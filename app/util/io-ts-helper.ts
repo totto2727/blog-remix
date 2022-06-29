@@ -5,27 +5,27 @@ import { NonEmptyString } from "io-ts-types";
 import { PathReporter } from "io-ts/lib/PathReporter";
 import invariant from "tiny-invariant";
 
-type InvariantCodec = <T>(
-  codec: Type<T, T, unknown>,
-  x: unknown
-) => asserts x is T;
-export const invariantCodec: InvariantCodec = (codec, x) => {
-  const validation = codec.decode(x);
-  invariant(isRight(validation), PathReporter.report(validation).join("\n"));
-};
-
 export const createTypeChecker =
   <T>(typeC: Type<T, T, unknown>) =>
   (x: unknown): x is T =>
     isRight(typeC.decode(x));
 
+type InvariantCodec = <T, O = T>(
+  codec: Type<T, O, unknown>,
+  x: unknown
+) => asserts x is O;
+export const invariantCodec: InvariantCodec = (codec, x) => {
+  const validation = codec.decode(x);
+  invariant(isRight(validation), PathReporter.report(validation).join("\n"));
+};
+
 const PATH_REPORT_KEY_REGEXP = /\/(.+):(.+)$/;
 
-export class TypeChecker<A, O = A> {
+export class TypeChecker<A extends object, O = A> {
   private _codec: Type<A, O, unknown>;
-  private _report: Partial<{
-    [key in keyof TypeOf<Type<A, O, unknown>>]: boolean;
-  }> = {};
+  private _report?: Partial<{
+    [key in keyof TypeOf<Type<A, O, unknown>>]: string;
+  }>;
 
   constructor(codec: Type<A, O, unknown>) {
     this._codec = codec;
@@ -34,19 +34,25 @@ export class TypeChecker<A, O = A> {
   validate = (x: unknown): x is O => {
     const validate = this._codec.decode(x);
     const reports = PathReporter.report(validate);
-    const report = Object.fromEntries(
-      reports?.map((report) => {
-        const regexp = new RegExp(PATH_REPORT_KEY_REGEXP);
-        const result = report.match(regexp);
-        invariant(result);
-        return [result[1], report];
-      }) ?? []
+    if (isRight(validate)) return true;
+
+    const errors = Object.fromEntries(
+      reports
+        .map((report) => {
+          const regexp = new RegExp(PATH_REPORT_KEY_REGEXP);
+          const result = report.match(regexp);
+          if (result?.length) {
+            return [result[1], report] as const;
+          }
+          return [undefined, undefined] as const;
+        })
+        .filter(([x, y]) => x && y)
     );
-    this._report = report as unknown as Partial<{
-      [key in keyof TypeOf<Type<A, O, unknown>>]: boolean;
+    this._report = errors as unknown as Partial<{
+      [key in keyof TypeOf<Type<A, O, unknown>>]: string;
     }>;
 
-    return isRight(validate);
+    return false;
   };
 
   get report() {
