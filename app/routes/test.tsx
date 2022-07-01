@@ -1,3 +1,5 @@
+import { Text, Button, List, Title, Group, AppShell } from "@mantine/core";
+
 export default function Test() {
   const switchMode = () => {
     const current = document.documentElement.getAttribute("data-theme");
@@ -15,32 +17,47 @@ export default function Test() {
   };
 
   return (
-    <div className="prose">
-      <button className="btn" onClick={switchMode}>
-        Mode
-      </button>
-      <button className="btn btn-primary">abc</button>
-      <button className="btn btn-secondary">abc</button>
-      <button className="btn">abc</button>
-      <h1>H1</h1>
-      <h2>H2</h2>
-      <h3>H3</h3>
-      <h4>H4</h4>
-      <ol>
-        <li>1</li>
-        <li>2</li>
-        <li>3</li>
-        <li>4</li>
-      </ol>
-      <ul>
-        <li>1</li>
-        <li>2</li>
-        <li>3</li>
-        <li>4</li>
-      </ul>
-      <section className="prose">
-        <p>あいうえお</p>
-      </section>
-    </div>
+    <>
+      <AppShell
+        header={
+          <header>
+            <Group>
+              <Button variant="default" onClick={switchMode}>
+                Mode
+              </Button>
+              <Button variant="outline" loading>
+                abc
+              </Button>
+              <Button>abc</Button>
+              <Button>abc</Button>
+            </Group>
+          </header>
+        }
+        footer={
+          <footer>
+            <Text>あいうえお</Text>
+          </footer>
+        }
+      >
+        <main>
+          <Title order={1}>H1</Title>
+          <Title order={2}>H2</Title>
+          <Title order={3}>H3</Title>
+          <Title order={4}>H4</Title>
+          <List type="ordered">
+            <List.Item>1</List.Item>
+            <List.Item>2</List.Item>
+            <List.Item>3</List.Item>
+            <List.Item>4</List.Item>
+          </List>
+          <List type="unordered">
+            <List.Item>1</List.Item>
+            <List.Item>2</List.Item>
+            <List.Item>3</List.Item>
+            <List.Item>4</List.Item>
+          </List>
+        </main>
+      </AppShell>
+    </>
   );
 }
