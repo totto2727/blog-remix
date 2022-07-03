@@ -1,25 +1,32 @@
 import { Button, Grid, Textarea, TextInput } from "@mantine/core";
-import { upperFirst } from "@mantine/hooks";
 import type { ActionFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { Form, useActionData } from "@remix-run/react";
 import { array, record, tuple } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
+import type { Option } from "fp-ts/lib/Option";
+import type { TypeOf } from "io-ts";
+import { type } from "io-ts";
 import { createPost } from "~/models/post.server";
 import { fontFamily } from "~/util/css";
-import { NonEmptyStringStrict, TypeChecker } from "~/util/io-ts-helper";
+import {
+  NonEmptyStringStrict,
+  Validator,
+  viewErrorMessage,
+} from "~/util/io-ts-helper";
 import { trimFormDataEntryValue } from "~/util/remix-helper";
 
-const formDateP = {
+const formDateC = type({
   title: NonEmptyStringStrict,
   slug: NonEmptyStringStrict,
   markdown: NonEmptyStringStrict,
-};
+});
+
+type FormData = TypeOf<typeof formDateC>;
 
 type ActionData = {
-  errors: Partial<Record<keyof typeof formDateP, string>>;
-  report: string[];
+  error: Partial<Record<keyof FormData, Option<string>>>;
 };
 
 export const action: ActionFunction = async ({ request }) => {
@@ -32,19 +39,13 @@ export const action: ActionFunction = async ({ request }) => {
     record.map(trimFormDataEntryValue)
   );
 
-  const typeChecker = new TypeChecker(formDateP);
-  if (typeChecker.validate(post)) {
+  const postValidator = new Validator(formDateC);
+  if (postValidator.validate(post)) {
     await createPost(post);
     return redirect("/posts/admin");
   } else {
-    const errors = pipe(
-      typeChecker.errors,
-      record.mapWithIndex((k, _) => `${upperFirst(k)} is required`)
-    );
-
     return json<ActionData>({
-      errors,
-      report: typeChecker.report,
+      error: postValidator.error,
     });
   }
 };
@@ -60,7 +61,7 @@ export default function NewPost() {
             type="text"
             name="title"
             label="Post Title"
-            error={ad?.errors.title}
+            error={viewErrorMessage(ad?.error.title)}
             required
           />
         </Grid.Col>
@@ -69,7 +70,7 @@ export default function NewPost() {
             type="text"
             name="slug"
             label="Post Slug"
-            error={ad?.errors.slug}
+            error={viewErrorMessage(ad?.error.slug)}
             required
           />
         </Grid.Col>
@@ -77,7 +78,7 @@ export default function NewPost() {
           <Textarea
             name="markdown"
             label="Markdown"
-            error={ad?.errors.markdown}
+            error={viewErrorMessage(ad?.error.markdown)}
             required
             autosize
             styles={{

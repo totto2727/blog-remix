@@ -1,18 +1,22 @@
-import { isRight } from "fp-ts/lib/Either";
-import type { Branded, Props, Type, TypeC, TypeOf } from "io-ts";
-import { type } from "io-ts";
-import { brand } from "io-ts";
-import { NonEmptyString } from "io-ts-types";
+import { array, option } from "fp-ts";
+import { fold, isRight } from "fp-ts/lib/Either";
+import { pipe } from "fp-ts/lib/function";
+import type { Option } from "fp-ts/lib/Option";
+import { foldW } from "fp-ts/lib/Option";
+import { not } from "fp-ts/lib/Predicate";
+import { isEmpty } from "fp-ts/lib/string";
+import * as t from "io-ts";
+import { NonEmptyString, withMessage } from "io-ts-types";
 import { PathReporter } from "io-ts/lib/PathReporter";
 import invariant from "tiny-invariant";
 
 export const createTypeChecker =
-  <T>(typeC: Type<T, T, unknown>) =>
+  <T>(typeC: t.Type<T>) =>
   (x: unknown): x is T =>
     isRight(typeC.decode(x));
 
 type InvariantCodec = <T, O = T>(
-  codec: Type<T, O, unknown>,
+  codec: t.Type<T, O, unknown>,
   x: unknown
 ) => asserts x is O;
 export const invariantCodec: InvariantCodec = (codec, x) => {
@@ -20,45 +24,75 @@ export const invariantCodec: InvariantCodec = (codec, x) => {
   invariant(isRight(validation), PathReporter.report(validation).join("\n"));
 };
 
-const PATH_REPORT_KEY_REGEXP = /\/(.+):(.+)$/;
+const getPath = (error: t.ValidationError) =>
+  error.context
+    .map(({ key }) => key)
+    .filter(not(isEmpty))
+    .join(".");
 
-export class TypeChecker<A extends Props> {
-  private _codec: TypeC<A>;
-  private _errors: Partial<Record<string, string>> = {};
-  private _report: string[] = [];
+const getReportRecord = <A>(
+  v: t.Validation<A>
+): Partial<Record<string, Option<string>>> => {
+  return pipe(
+    v,
+    fold(
+      array.map(
+        (x) =>
+          [
+            getPath(x),
+            pipe(x.message ?? "", option.fromPredicate(not(isEmpty))),
+          ] as const
+      ),
+      () => []
+    ),
+    Object.fromEntries
+  );
+};
 
-  constructor(props: A) {
-    this._codec = type(props);
+export const viewErrorMessage = (
+  message: Option<string> | undefined,
+  empty = "error"
+): string | undefined => {
+  if (message) {
+    return pipe(
+      message,
+      foldW(
+        () => empty,
+        (x) => x
+      )
+    );
+  }
+  return message;
+};
+
+export class Validator<A extends t.Props> {
+  private _codec: t.TypeC<A>;
+  private _validation: t.Validation<t.TypeOf<t.TypeC<A>>> | undefined;
+
+  constructor(codec: t.TypeC<A>) {
+    this._codec = codec;
   }
 
-  validate = (x: unknown): x is TypeOf<TypeC<A>> => {
-    const validate = this._codec.decode(x);
-    this._report = PathReporter.report(validate);
-    if (isRight(validate)) return true;
-
-    this._report.forEach((report) => {
-      const regexp = new RegExp(PATH_REPORT_KEY_REGEXP);
-      const result = report.match(regexp);
-      if (result?.length) this._errors[result[1]] = report;
-    });
-
-    return false;
+  validate = (x: unknown): x is t.TypeOf<t.TypeC<A>> => {
+    this._validation = this._codec.decode(x);
+    return isRight(this._validation);
   };
 
-  get report() {
-    return this._report;
-  }
-
-  get errors() {
-    return this._errors;
+  get error() {
+    if (this._validation) return getReportRecord(this._validation);
+    else return {};
   }
 }
 
 interface INonEmptyStringStrict {
   readonly NonEmptyStringStrict: unique symbol;
 }
-export const NonEmptyStringStrict = brand(
-  NonEmptyString,
-  (n): n is Branded<NonEmptyString, INonEmptyStringStrict> => n.trim() === n,
-  "NonEmptyStringStrict"
+export const NonEmptyStringStrict = withMessage(
+  t.brand(
+    NonEmptyString,
+    (n): n is t.Branded<NonEmptyString, INonEmptyStringStrict> =>
+      n.trim() === n,
+    "NonEmptyStringStrict"
+  ),
+  () => "1文字以上入力が必要です。"
 );
