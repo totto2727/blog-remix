@@ -1,5 +1,12 @@
-import { MantineProvider } from "@mantine/core";
-import type { LinksFunction, MetaFunction } from "@remix-run/node";
+import type { ColorScheme } from "@mantine/core";
+import { ColorSchemeProvider, MantineProvider } from "@mantine/core";
+import type {
+  LinksFunction,
+  LoaderFunction,
+  MetaFunction,
+} from "@remix-run/node";
+import { json } from "@remix-run/node";
+import { createCookie } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -7,7 +14,10 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
+import { literal, union } from "io-ts";
+import { useState } from "react";
 import { fontFamily } from "./util/css";
 
 export const meta: MetaFunction = () => ({
@@ -32,10 +42,30 @@ export const links: LinksFunction = () => [
   },
 ];
 
+export const loader: LoaderFunction = async ({ request }) => {
+  const colorSchemeCookie = createCookie("colorScheme", {
+    maxAge: 604_800, // one week
+  });
+  const cookieHeader = request.headers.get("Cookie");
+  const parsedCookie = await colorSchemeCookie.parse(cookieHeader);
+  const cookie =
+    parsedCookie.colorScheme === "dark"
+      ? parsedCookie
+      : { colorScheme: "light" };
+  return json(cookie, {
+    headers: {
+      "Set-Cookie": await colorSchemeCookie.serialize(cookie),
+    },
+  });
+};
+
 export default function App() {
+  const { colorScheme } = useLoaderData<{ colorScheme: ColorScheme }>();
+
   return (
     <MantineProvider
       theme={{
+        colorScheme,
         fontFamily: fontFamily.sans,
         fontFamilyMonospace: fontFamily.mono,
       }}
@@ -47,7 +77,7 @@ export default function App() {
           <Meta />
           <Links />
         </head>
-        <body>
+        <body style={{ width: "100vw", height: "100vh" }}>
           <Outlet />
           <ScrollRestoration />
           <Scripts />
