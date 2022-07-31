@@ -3,7 +3,11 @@
   "sideEffects": false,
   "scripts": {
     "build": "remix build",
-    "dev": "remix dev"
+    "dev": "remix dev",
+    "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
+    "format": "prettier --check ./app",
+    "fix": "eslint --cache --cache-location ./node_modules/.cache/eslint . && prettier --write ./app",
+    "typecheck": "tsc -b && tsc -b cypress"
   },
   "dependencies": {
     "@braintree/sanitize-url": "^6.0.0",
@@ -27,6 +31,7 @@
     "newtype-ts": "^0.3.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^4.4.0",
     "sanitize-html": "^2.7.0",
     "tiny-invariant": "^1.2.0"
   },
@@ -40,12 +45,15 @@
     "@types/react-dom": "^18.0.6",
     "@types/sanitize-html": "^2.6.2",
     "eslint": "^8.19.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
     "prisma": "^4.0.0",
+    "scaffdog": "^1.5.0",
     "ts-node": "^10.8.2",
     "typescript": "^4.7.4"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=16"
   },
   "prisma": {
     "seed": "node --loader ts-node/esm prisma/seed.ts"
