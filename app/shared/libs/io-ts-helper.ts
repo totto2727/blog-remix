@@ -6,7 +6,8 @@ import { foldW } from 'fp-ts/lib/Option'
 import { not } from 'fp-ts/lib/Predicate'
 import { isEmpty } from 'fp-ts/lib/string'
 import * as t from 'io-ts'
-import { NonEmptyString, withMessage } from 'io-ts-types'
+import type { NonEmptyString } from 'io-ts-types'
+import { withMessage } from 'io-ts-types'
 import { PathReporter } from 'io-ts/lib/PathReporter'
 import invariant from 'tiny-invariant'
 
@@ -32,7 +33,7 @@ const getPath = (error: t.ValidationError) =>
 
 const getReportRecord = <A>(
   v: t.Validation<A>
-): Partial<Record<string, Option<string>>> => {
+): Record<string, Option<string>> => {
   return pipe(
     v,
     fold(
@@ -84,12 +85,12 @@ export class Validator<A extends t.Props> {
   }
 }
 
-interface INonEmptyStringStrict {
+type INonEmptyStringStrict = {
   readonly NonEmptyStringStrict: unique symbol
 }
 export const NonEmptyStringStrict = withMessage(
   t.brand(
-    NonEmptyString,
+    t.string,
     (n): n is t.Branded<NonEmptyString, INonEmptyStringStrict> =>
       n.trim() === n,
     'NonEmptyStringStrict'
