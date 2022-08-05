@@ -28,3 +28,6 @@ pnpm-lock.yml
 /cypress/videos
 /prisma/data.db
 /prisma/data.db-journal
+
+# Supabase
+.supabase
