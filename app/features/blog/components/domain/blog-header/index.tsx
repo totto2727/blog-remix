@@ -7,7 +7,7 @@ import {
   useMantineColorScheme,
 } from '@mantine/core'
 import { TbSun, TbMoonStars } from 'react-icons/tb'
-import { notifyColorSchemeChange } from '~/shared/models/colorSchemeCookie'
+import { notifyColorSchemeChange } from '~/shared/models/color-scheme-cookie'
 
 export const BlogHeader = () => {
   const { colorScheme, toggleColorScheme } = useMantineColorScheme()

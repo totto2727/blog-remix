@@ -7,7 +7,7 @@ export const validateColorScheme = createTypeChecker(colorSchemeC)
 export type ColorScheme = TypeOf<typeof colorSchemeC>
 
 export const notifyColorSchemeChange = async () =>
-  await fetch('/cookie/colorScheme', { method: 'get' })
+  await fetch('/cookie/color-scheme', { method: 'get' })
 
 export const toggleColorScheme = (
   colorScheme: ColorScheme | null | undefined

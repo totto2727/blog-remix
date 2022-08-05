@@ -1,3 +1,4 @@
+import type { ColorScheme } from '@mantine/core'
 import { ColorSchemeProvider } from '@mantine/core'
 import { MantineProvider } from '@mantine/core'
 import type {
@@ -17,11 +18,10 @@ import {
 } from '@remix-run/react'
 import { useState } from 'react'
 import { fontFamily } from './shared/configs/css'
-import type { ColorScheme } from './shared/models/colorSchemeCookie'
 import {
-  generateHeadersWithColorSchemeCookie,
   parseColorSchemeCookie,
-} from './shared/models/colorSchemeCookie/index.server'
+  generateHeadersWithColorSchemeCookie,
+} from './shared/models/color-scheme-cookie/index.server'
 
 export const meta: MetaFunction = () => ({
   charset: 'utf-8',

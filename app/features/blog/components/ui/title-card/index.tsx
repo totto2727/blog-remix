@@ -3,7 +3,7 @@ import { utcToZonedTime } from 'date-fns-tz'
 
 export const TitleCard = (props: {
   title: string
-  datetime: string
+  datetime: Date
   image: string
 }) => {
   const zonedDate = utcToZonedTime(props.datetime, 'Asia/Tokyo')

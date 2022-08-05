@@ -6,8 +6,8 @@ import {
 import type { ColorScheme } from '.'
 import { validateColorScheme } from '.'
 
-export const colorSchemeCookie = createCookie('colorScheme', {
-  maxAge: 604_800, // one week
+const colorSchemeCookie = createCookie('colorScheme', {
+  maxAge: 7 * 24 * 60 * 60,
 })
 
 export const parseColorSchemeCookie = async (
