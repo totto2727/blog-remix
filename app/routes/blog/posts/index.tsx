@@ -1,11 +1,11 @@
 import { sanitizeUrl } from '@braintree/sanitize-url'
-import { Container, FloatingTooltip, Grid, Title } from '@mantine/core'
-import type { Post } from '@prisma/client'
+import { Box, Container, Grid, Title, Tooltip } from '@mantine/core'
 import { json } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
 import { isRight } from 'fp-ts/lib/Either'
-import { TitleCard } from '~/features/blog/components/ui/TitleCard'
-import { getPosts } from '~/features/blog/models/post/index.server'
+import { TitleCard } from '~/features/blog/components/ui/title-card'
+import type { Post } from '~/features/blog/models/post'
+import { getPublishedPosts } from '~/features/blog/models/post/index.server'
 import { Link } from '~/shared/components/ui/link'
 
 type LoaderData = {
@@ -13,7 +13,7 @@ type LoaderData = {
 }
 
 export const loader = async () => {
-  const ok = await getPosts()
+  const ok = await getPublishedPosts()
   if (isRight(ok)) {
     return json<LoaderData>({ posts: ok.right })
   } else {
@@ -22,7 +22,7 @@ export const loader = async () => {
 }
 
 export default function Posts() {
-  const { posts } = useLoaderData<LoaderData>()
+  const { posts } = useLoaderData<typeof loader>()
   return (
     <Container>
       <Title order={1} align='center' style={{ marginBottom: '1rem' }}>
@@ -30,18 +30,19 @@ export default function Posts() {
       </Title>
       <Grid>
         {posts.map((post) => (
-          <Grid.Col span={6} key={post.slug}>
-            <Link
-              to={sanitizeUrl(post.slug)}
-              style={{ textDecoration: 'none' }}
-            >
-              <FloatingTooltip label={post.title} style={{ width: '100%' }}>
-                <TitleCard
-                  title={post.title}
-                  image='https://cdn.pixabay.com/photo/2022/06/27/10/58/mount-kilimanjaro-7287226_1280.jpg'
-                  datetime={post.updatedAt}
-                ></TitleCard>
-              </FloatingTooltip>
+          <Grid.Col span={6} key={post.id}>
+            <Link to={sanitizeUrl(post.id)} style={{ textDecoration: 'none' }}>
+              <Tooltip.Floating label={post.title}>
+                <Box>
+                  <TitleCard
+                    title={post.title}
+                    image={sanitizeUrl(
+                      'https://cdn.pixabay.com/photo/2022/06/27/10/58/mount-kilimanjaro-7287226_1280.jpg'
+                    )}
+                    datetime={new Date(post.updatedAt)}
+                  />
+                </Box>
+              </Tooltip.Floating>
             </Link>
           </Grid.Col>
         ))}
