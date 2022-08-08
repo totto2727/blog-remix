@@ -1,3 +1,4 @@
+import { left, right } from 'fp-ts/lib/Either'
 import * as t from 'io-ts'
 import type { NonEmptyString } from 'io-ts-types'
 import { withMessage } from 'io-ts-types'
@@ -10,13 +11,12 @@ const emailC = t.brand(
   (n): n is t.Branded<NonEmptyString, IEmail> => isEmail(n),
   'Email'
 )
-type Email = t.TypeOf<typeof emailC>
 
 const emailAndPasswordC = t.type({
   email: withMessage(emailC, () => 'Email is string'),
   password: withMessage(t.string, () => 'Password is string'),
 })
-
+export type EmailAndPassword = t.TypeOf<typeof emailAndPasswordC>
 const emailAndPasswordValidator = new Validator(emailAndPasswordC)
 
 export const extractEmailAndPasswordFromFormData = (formData: FormData) => {
@@ -25,8 +25,8 @@ export const extractEmailAndPasswordFromFormData = (formData: FormData) => {
     password: formData.get('password'),
   }
   if (emailAndPasswordValidator.validate(emailAndPassword)) {
-    return { emailAndPassword }
+    return right(emailAndPassword)
   } else {
-    return { error: emailAndPasswordValidator.error }
+    return left(emailAndPasswordValidator.error)
   }
 }

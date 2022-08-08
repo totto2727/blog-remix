@@ -3,9 +3,11 @@ import {
   createGeneratorHeaderWithCookie,
   getCookieRaw,
 } from '~/shared/libs/cookie-helper.server'
-import * as t from 'io-ts'
-import { createTypeChecker } from '~/shared/libs/io-ts-helper'
 import { COOKIE_SECRET } from '~/shared/configs/cookie.server'
+import type { Auth } from '.'
+import { authValidator } from '.'
+import { validateAuthCookie } from '.'
+import { left, right } from 'fp-ts/lib/Either'
 
 const authCookie = createCookie('auth', {
   maxAge: 180, //3分間待
@@ -14,15 +16,11 @@ const authCookie = createCookie('auth', {
   secure: process.env.NODE_ENV === 'production',
 })
 
-const authC = t.type({ access: t.string, refresh: t.string })
-type Auth = t.TypeOf<typeof authC>
-const validateAuthCookie = createTypeChecker(authC)
-
 export const parseAuthCookie = async (request: Request) => {
   const rawCookie = getCookieRaw(request)
   const parsedCookie = await authCookie.parse(rawCookie)
-  if (validateAuthCookie(parsedCookie)) return parsedCookie
-  else return undefined
+  if (authValidator.validate(parsedCookie)) return right(parsedCookie)
+  else return left(authValidator.error)
 }
 
 export const generateHeadersWithAuthCookie =

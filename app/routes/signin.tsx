@@ -2,27 +2,30 @@ import type { LoaderArgs } from '@remix-run/node'
 import { redirect } from '@remix-run/node'
 import { json } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
-import { supabase } from '~/shared/configs/supabase'
+import { isLeft } from 'fp-ts/lib/Either'
+import { supabaseAuthAPISignInWithEmail } from '~/shared/libs/supabase-helper'
 import { generateHeadersWithAuthCookie } from '~/shared/models/auth-cookie/index.server'
 import { extractEmailAndPasswordFromFormData } from '~/shared/models/email-and-password'
 
 export const action = async ({ request }: LoaderArgs) => {
   const form = await request.formData()
-  const { emailAndPassword, error: formError } =
-    extractEmailAndPasswordFromFormData(form)
-  if (!emailAndPassword) return json({ error: formError })
+  const emailAndPasswordEither = extractEmailAndPasswordFromFormData(form)
+  if (isLeft(emailAndPasswordEither)) return json(emailAndPasswordEither.left)
 
-  const { data: session, error } = await supabase.auth.api.signInWithEmail(
-    emailAndPassword.email,
-    emailAndPassword.password
-  )
-  if (!session?.access_token || !session.refresh_token) return json({ error })
+  const emailAndPassword = emailAndPasswordEither.right
+  const authEither = await supabaseAuthAPISignInWithEmail(emailAndPassword)()
+  if (isLeft(authEither)) return json(authEither.left)
+
+  const { access_token, refresh_token } = authEither.right
+  if (!refresh_token) {
+    return json({})
+  }
 
   return redirect(
     '/admin',
     await generateHeadersWithAuthCookie({
-      access: session.access_token,
-      refresh: session.refresh_token,
+      access: access_token,
+      refresh: refresh_token,
     })
   )
 }

@@ -2,6 +2,7 @@ import type { LoaderArgs } from '@remix-run/node'
 import { json } from '@remix-run/node'
 import { redirect } from '@remix-run/node'
 import { Outlet, useLoaderData } from '@remix-run/react'
+import { isLeft } from 'fp-ts/lib/Either'
 import { supabase } from '~/shared/configs/supabase'
 import {
   parseAuthCookie,
@@ -9,15 +10,14 @@ import {
 } from '~/shared/models/auth-cookie/index.server'
 
 export const loader = async ({ request }: LoaderArgs) => {
-  const cookie = await parseAuthCookie(request)
-  if (!cookie) return redirect('/signin')
+  const cookieEither = await parseAuthCookie(request)
+  if (isLeft(cookieEither)) return redirect('/signin')
 
-  const { data: user } = await supabase.auth.api.getUser(cookie.access)
+  const { access, refresh } = cookieEither.right
+  const { data: user } = await supabase.auth.api.getUser(access)
   if (!user) return redirect('/signin')
 
-  const { data: session } = await supabase.auth.api.refreshAccessToken(
-    cookie.refresh
-  )
+  const { data: session } = await supabase.auth.api.refreshAccessToken(refresh)
   if (!session?.access_token || !session.refresh_token)
     return redirect('/signin')
 
