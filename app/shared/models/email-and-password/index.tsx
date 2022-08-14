@@ -1,9 +1,9 @@
 import { left, right } from 'fp-ts/lib/Either'
 import * as t from 'io-ts'
-import type { NonEmptyString } from 'io-ts-types'
+import { NonEmptyString } from 'io-ts-types'
 import { withMessage } from 'io-ts-types'
 import isEmail from 'validator/lib/isEmail'
-import { Validator } from '~/shared/libs/io-ts-helper'
+import { CodecValidator } from '~/shared/libs/io-ts'
 
 type IEmail = { readonly Email: unique symbol }
 const emailC = t.brand(
@@ -12,12 +12,12 @@ const emailC = t.brand(
   'Email'
 )
 
-const emailAndPasswordC = t.type({
-  email: withMessage(emailC, () => 'Email is string'),
-  password: withMessage(t.string, () => 'Password is string'),
+export const emailAndPasswordC = t.type({
+  email: withMessage(emailC, () => 'メールアドレスを入力してください'),
+  password: withMessage(NonEmptyString, () => 'パスワードを入力してください'),
 })
 export type EmailAndPassword = t.TypeOf<typeof emailAndPasswordC>
-const emailAndPasswordValidator = new Validator(emailAndPasswordC)
+const emailAndPasswordValidator = new CodecValidator(emailAndPasswordC)
 
 export const extractEmailAndPasswordFromFormData = (formData: FormData) => {
   const emailAndPassword = {

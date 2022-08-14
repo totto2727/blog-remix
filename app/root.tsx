@@ -6,7 +6,6 @@ import type {
   LoaderFunction,
   MetaFunction,
 } from '@remix-run/node'
-import { json } from '@remix-run/node'
 import {
   Links,
   LiveReload,
@@ -18,14 +17,11 @@ import {
 } from '@remix-run/react'
 import { useState } from 'react'
 import { fontFamily } from './shared/configs/css'
-import {
-  parseColorSchemeCookie,
-  generateHeadersWithColorSchemeCookie,
-} from './shared/models/color-scheme-cookie/index.server'
+import { addColorSchemeCookie } from './shared/service/color-scheme/index.server'
 
 export const meta: MetaFunction = () => ({
   charset: 'utf-8',
-  title: 'New Remix App',
+  title: `totto's HomePage`,
   viewport: 'width=device-width,initial-scale=1',
 })
 
@@ -45,13 +41,8 @@ export const links: LinksFunction = () => [
   },
 ]
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const parsedCookie = await parseColorSchemeCookie(request)
-  return json<ColorScheme>(
-    parsedCookie,
-    await generateHeadersWithColorSchemeCookie(parsedCookie)
-  )
-}
+export const loader: LoaderFunction = async ({ request }) =>
+  await addColorSchemeCookie(request)
 
 export default function App() {
   const loaderData = useLoaderData<ColorScheme>()
