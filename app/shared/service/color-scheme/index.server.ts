@@ -15,11 +15,10 @@ export const toggleColorSchemeCookie = async (request: Request) => {
   )
 }
 
-export const addColorSchemeCookie = async ( request :Request) => {
+export const addColorSchemeCookie = async (request: Request) => {
   const parsedCookie = await parseColorSchemeCookie(request)
   return json<ColorScheme>(
     parsedCookie,
     await generateHeadersWithColorSchemeCookie(parsedCookie)
   )
 }
-

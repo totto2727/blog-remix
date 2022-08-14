@@ -31,3 +31,4 @@ pnpm-lock.yml
 
 # Supabase
 .supabase
+coverage

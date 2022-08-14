@@ -11,6 +11,13 @@
     "fix": "eslint --cache --cache-location ./node_modules/.cache/eslint . && prettier --write ./app",
     "typecheck": "tsc -b && tsc -b cypress"
   },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "npm run typecheck",
+      "npm run fix",
+      "npm run coverage"
+    ]
+  },
   "dependencies": {
     "@braintree/sanitize-url": "^6.0.0",
     "@emotion/react": "^11.10.0",
@@ -55,10 +62,13 @@
     "@types/sanitize-html": "^2.6.2",
     "@types/validator": "^13.7.4",
     "@vitejs/plugin-react": "^2.0.0",
+    "c8": "^7.12.0",
     "eslint": "^8.21.0",
     "eslint-config-prettier": "^8.5.0",
     "happy-dom": "^6.0.4",
+    "hasky": "^3.0.2",
     "jest-chain": "^1.1.5",
+    "lint-staged": "^13.0.3",
     "prettier": "^2.7.1",
     "scaffdog": "^1.5.0",
     "ts-node": "^10.9.1",
