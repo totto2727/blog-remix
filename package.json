@@ -4,6 +4,8 @@
   "scripts": {
     "build": "remix build",
     "dev": "remix dev",
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "format": "prettier --check ./app",
     "fix": "eslint --cache --cache-location ./node_modules/.cache/eslint . && prettier --write ./app",
@@ -35,26 +37,34 @@
     "react-icons": "^4.4.0",
     "remix-auth": "^3.2.2",
     "remix-auth-supabase": "^4.0.0",
+    "remix-validated-form": "^4.5.5",
     "sanitize-html": "^2.7.1",
     "tiny-invariant": "^1.2.0",
     "validator": "^13.7.0"
   },
   "devDependencies": {
+    "@relmify/jest-fp-ts": "^2.0.2",
     "@remix-run/dev": "^1.6.7",
     "@remix-run/eslint-config": "^1.6.7",
     "@remix-run/serve": "^1.6.7",
+    "@testing-library/jest-dom": "^5.16.5",
     "@types/marked": "^4.0.3",
     "@types/node": "^18.6.3",
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
     "@types/sanitize-html": "^2.6.2",
     "@types/validator": "^13.7.4",
+    "@vitejs/plugin-react": "^2.0.0",
     "eslint": "^8.21.0",
     "eslint-config-prettier": "^8.5.0",
+    "happy-dom": "^6.0.4",
+    "jest-chain": "^1.1.5",
     "prettier": "^2.7.1",
     "scaffdog": "^1.5.0",
     "ts-node": "^10.9.1",
-    "typescript": "^4.7.4"
+    "typescript": "^4.7.4",
+    "vite-tsconfig-paths": "^3.5.0",
+    "vitest": "^0.21.1"
   },
   "engines": {
     "node": ">=16"
