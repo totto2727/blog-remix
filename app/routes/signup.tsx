@@ -2,15 +2,17 @@ import type { ActionFunction } from '@remix-run/node'
 import { redirect } from '@remix-run/node'
 import { json } from '@remix-run/node'
 import { Form, useActionData } from '@remix-run/react'
+import { isLeft } from 'fp-ts/lib/Either'
 import { supabase } from '~/shared/configs/supabase'
 import { extractEmailAndPasswordFromFormData } from '~/shared/models/email-and-password'
+
 export const action: ActionFunction = async ({ request }) => {
   const form = await request.formData()
-  const { emailAndPassword, error: formError } =
-    extractEmailAndPasswordFromFormData(form)
-  if (!emailAndPassword) return json({ error: formError })
+  const emailAndPasswordEither = extractEmailAndPasswordFromFormData(form)
+  if (isLeft(emailAndPasswordEither))
+    return json({ error: emailAndPasswordEither.left })
 
-  const { error } = await supabase.auth.signUp(emailAndPassword)
+  const { error } = await supabase.auth.signUp(emailAndPasswordEither.right)
 
   if (error) return json({ error })
   else return redirect('/signin')

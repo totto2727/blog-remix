@@ -1,6 +1,6 @@
 import * as t from 'io-ts'
 import { date, UUID, withMessage } from 'io-ts-types'
-import { NonEmptyStringStrict } from '~/shared/libs/io-ts-helper'
+import { NonEmptyStringStrict } from '~/shared/libs/io-ts'
 
 const postStatusTypeC = t.union([
   t.literal('draft'),
