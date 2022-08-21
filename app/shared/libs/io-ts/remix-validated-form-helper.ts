@@ -1,36 +1,39 @@
 import type { Validator } from 'remix-validated-form'
 import { createValidator } from 'remix-validated-form'
-import { array } from 'fp-ts'
-import { fold, isRight } from 'fp-ts/lib/Either'
-import { pipe } from 'fp-ts/lib/function'
-import { fromEntries } from 'fp-ts/lib/ReadonlyRecord'
+import { option, record } from 'fp-ts'
+import { pipe, flow } from 'fp-ts/lib/function'
 import type { Mixed, TypeOf, Validation } from 'io-ts'
-import { getPath } from './getPath'
+import { reportErrors } from './report-errors'
+import { E } from '../fp-ts'
 
-export const getReportRecord = <A>(
-  v: Validation<A>
-): Record<string, string> => {
-  return pipe(
+export const getReportRecord = <A>(v: Validation<A>) =>
+  pipe(
     v,
-    fold(
-      array.map((x) => [getPath(x), x.message ?? ''] as const),
-      () => []
-    ),
-    fromEntries
+    E.fold(
+      flow(
+        reportErrors,
+        record.map(
+          option.fold(
+            () => '',
+            (s) => s
+          )
+        )
+      ),
+      () => ({})
+    )
   )
-}
 
 export const withIoTs = <T extends Mixed>(codec: T): Validator<TypeOf<T>> =>
   createValidator({
     validate: async (unvalidatedData) => {
       const validation = codec.decode(unvalidatedData)
-      if (isRight(validation))
+      if (E.isRight(validation))
         return { data: validation.right, error: undefined }
       else return { data: undefined, error: getReportRecord(validation) }
     },
     validateField: async (unvalidatedData, field) => {
       const validation = codec.decode(unvalidatedData)
-      if (isRight(validation)) return {}
+      if (E.isRight(validation)) return {}
       else return { error: getReportRecord(validation)[field] ?? '' }
     },
   })

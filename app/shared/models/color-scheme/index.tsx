@@ -1,10 +1,11 @@
 import type { TypeOf } from 'io-ts'
 import { union, literal } from 'io-ts'
-import { createValidateCodec } from '~/shared/libs/io-ts'
+import { createCodecValidationReportor } from '~/shared/libs/io-ts'
 
 export const colorSchemeC = union([literal('light'), literal('dark')])
 export type ColorScheme = TypeOf<typeof colorSchemeC>
-export const validateColorScheme = createValidateCodec(colorSchemeC)
+export const reportColorSchemeValidation =
+  createCodecValidationReportor(colorSchemeC)
 
 export const notifyColorSchemeChange = async () =>
   await fetch('/cookie/color-scheme', { method: 'get' })

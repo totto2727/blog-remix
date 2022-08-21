@@ -8,15 +8,15 @@
     "coverage": "vitest run --coverage",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "format": "prettier --check ./app",
-    "fix": "eslint --cache --cache-location ./node_modules/.cache/eslint . && prettier --write ./app",
+    "fix": "eslint --fix --cache --cache-location ./node_modules/.cache/eslint . && prettier --write ./app",
     "typecheck": "tsc -b",
-    "typecheck_cypress": "tsc -b cypress"
+    "typecheck_cypress": "tsc -b cypress",
+    "prepare": "husky install"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --cache --cache-location ./node_modules/.cache/eslint . && prettier --write ./app",
-      "tsc -b",
-      "vitest run"
+    "app/**/*.{js,jsx,ts,tsx}": [
+      "eslint --fix --cache --cache-location ./node_modules/.cache/eslint .",
+      "prettier --write ./app"
     ]
   },
   "dependencies": {
@@ -68,6 +68,7 @@
     "eslint-config-prettier": "^8.5.0",
     "happy-dom": "^6.0.4",
     "hasky": "^3.0.2",
+    "husky": "^8.0.1",
     "jest-chain": "^1.1.5",
     "lint-staged": "^13.0.3",
     "prettier": "^2.7.1",

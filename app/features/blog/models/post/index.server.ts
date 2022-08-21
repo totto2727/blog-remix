@@ -1,13 +1,13 @@
 import { pipe } from 'fp-ts/lib/function'
-import * as TE from 'fp-ts/lib/TaskEither'
 import { supabase } from '~/shared/configs/supabase'
-import { supabaseFetch } from '~/shared/libs/supabase-helper'
+import { TE } from '~/shared/libs/fp-ts'
+import { query } from '~/shared/libs/supabase'
 import type { Post } from '.'
 
 export async function getPosts() {
   return await pipe(
     TE.tryCatch(
-      supabaseFetch(supabase.from<Post>('post').select('*')),
+      query(supabase.from<Post>('post').select('*')),
       (reason: unknown) => reason
     )
   )()
@@ -16,9 +16,7 @@ export async function getPosts() {
 export async function getPublishedPosts() {
   return await pipe(
     TE.tryCatch(
-      supabaseFetch(
-        supabase.from<Post>('post').select('*').eq('status', 'publish')
-      ),
+      query(supabase.from<Post>('post').select('*').eq('status', 'publish')),
       (reason: unknown) => reason
     )
   )()

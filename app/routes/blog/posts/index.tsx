@@ -2,11 +2,11 @@ import { sanitizeUrl } from '@braintree/sanitize-url'
 import { Box, Container, Grid, Title, Tooltip } from '@mantine/core'
 import { json } from '@remix-run/node'
 import { useLoaderData } from '@remix-run/react'
-import { isRight } from 'fp-ts/lib/Either'
 import { TitleCard } from '~/features/blog/components/ui/title-card'
 import type { Post } from '~/features/blog/models/post'
 import { getPublishedPosts } from '~/features/blog/models/post/index.server'
 import { Link } from '~/shared/components/ui/link'
+import { E } from '~/shared/libs/fp-ts'
 
 type LoaderData = {
   posts: Post[]
@@ -14,7 +14,7 @@ type LoaderData = {
 
 export const loader = async () => {
   const ok = await getPublishedPosts()
-  if (isRight(ok)) {
+  if (E.isRight(ok)) {
     return json<LoaderData>({ posts: ok.right })
   } else {
     throw ok.left

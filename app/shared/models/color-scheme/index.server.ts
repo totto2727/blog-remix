@@ -1,10 +1,11 @@
 import { createCookie } from '@remix-run/node'
+import { isRight } from 'fp-ts/lib/Either'
 import {
   createGeneratorHeaderWithCookie,
   getCookieRaw,
-} from '~/shared/libs/cookie-helper.server'
+} from '~/shared/libs/cookie'
 import type { ColorScheme } from '.'
-import { validateColorScheme } from '.'
+import { reportColorSchemeValidation } from '.'
 
 const colorSchemeCookie = createCookie('colorScheme', {
   maxAge: 7 * 24 * 60 * 60,
@@ -15,8 +16,9 @@ export const parseColorSchemeCookie = async (
 ): Promise<ColorScheme> => {
   const parsedCookie = await colorSchemeCookie.parse(getCookieRaw(request))
 
-  if (validateColorScheme(parsedCookie)) {
-    return parsedCookie
+  const report = reportColorSchemeValidation(parsedCookie)
+  if (isRight(report)) {
+    return report.right
   } else {
     return 'light'
   }

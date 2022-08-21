@@ -1,9 +1,9 @@
-import { left, right } from 'fp-ts/lib/Either'
 import * as t from 'io-ts'
 import { NonEmptyString } from 'io-ts-types'
 import { withMessage } from 'io-ts-types'
 import isEmail from 'validator/lib/isEmail'
-import { CodecValidator } from '~/shared/libs/io-ts'
+import { createCodecValidationReportor } from '~/shared/libs/io-ts'
+import { withIoTs } from '~/shared/libs/io-ts/remix-validated-form-helper'
 
 type IEmail = { readonly Email: unique symbol }
 const emailC = t.brand(
@@ -17,16 +17,15 @@ export const emailAndPasswordC = t.type({
   password: withMessage(NonEmptyString, () => 'パスワードを入力してください'),
 })
 export type EmailAndPassword = t.TypeOf<typeof emailAndPasswordC>
-const emailAndPasswordValidator = new CodecValidator(emailAndPasswordC)
+
+export const reportEmailAndPasswordValidation =
+  createCodecValidationReportor(emailAndPasswordC)
+export const validatorEmailAndPassword = withIoTs(emailAndPasswordC)
 
 export const extractEmailAndPasswordFromFormData = (formData: FormData) => {
   const emailAndPassword = {
     email: formData.get('email'),
     password: formData.get('password'),
   }
-  if (emailAndPasswordValidator.validate(emailAndPassword)) {
-    return right(emailAndPassword)
-  } else {
-    return left(emailAndPasswordValidator.error)
-  }
+  return reportEmailAndPasswordValidation(emailAndPassword)
 }
