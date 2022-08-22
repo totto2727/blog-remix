@@ -1,38 +1,37 @@
+import { Container, Stack } from '@mantine/core'
 import type { ActionFunction } from '@remix-run/node'
-import { redirect } from '@remix-run/node'
-import { json } from '@remix-run/node'
-import { Form, useActionData } from '@remix-run/react'
-import { supabase } from '~/shared/configs/supabase'
-import { E } from '~/shared/libs/fp-ts'
-import { extractEmailAndPasswordFromFormData } from '~/shared/models/email-and-password'
+import { useActionData } from '@remix-run/react'
+import { ValidatedForm, validationError } from 'remix-validated-form'
+import { BlogHeader } from '~/features/blog/components/domain/blog-header'
+import { SubmitButton, TextInput } from '~/shared/components/domain/form'
+import { AppShell, HeaderProvider } from '~/shared/components/ui/app-shell'
+import { validatorEmailAndPassword } from '~/shared/models/email-and-password'
+import { signup } from '~/shared/service/auth/index.server'
 
 export const action: ActionFunction = async ({ request }) => {
-  const form = await request.formData()
-  const emailAndPasswordEither = extractEmailAndPasswordFromFormData(form)
-  if (E.isLeft(emailAndPasswordEither))
-    return json({ error: emailAndPasswordEither.left })
-
-  const { error } = await supabase.auth.signUp(emailAndPasswordEither.right)
-
-  if (error) return json({ error })
-  else return redirect('/signin')
+  const emailAndPassword = await validatorEmailAndPassword.validate(
+    await request.formData()
+  )
+  if (emailAndPassword.error) return validationError(emailAndPassword.error)
+  return await signup(emailAndPassword.data)()
 }
 
 export default function SignUp() {
-  useActionData()
+  const error = useActionData<typeof action>()
   return (
-    <Form method='post'>
-      <div>
-        <label htmlFor='email'>Email</label>
-        <input type='email' name='email' id='email' />
-      </div>
-
-      <div>
-        <label htmlFor='password'>Password</label>
-        <input type='password' name='password' id='password' />
-      </div>
-
-      <button>Log In</button>
-    </Form>
+    <HeaderProvider value={BlogHeader}>
+      <AppShell>
+        <Container>
+          <ValidatedForm validator={validatorEmailAndPassword} method='post'>
+            <Stack>
+              <TextInput type='email' name='email' label='Email' />
+              <TextInput type='password' name='password' label='Password' />
+              <SubmitButton size='md' />
+              {error && <div>{JSON.stringify(error)}</div>}
+            </Stack>
+          </ValidatedForm>
+        </Container>
+      </AppShell>
+    </HeaderProvider>
   )
 }

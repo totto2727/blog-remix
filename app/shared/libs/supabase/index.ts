@@ -46,6 +46,24 @@ export const signInWithEmailAndPassword = ({
     }
   )
 
+export const signUpWithEmailAndPassword = ({
+  email,
+  password,
+}: EmailAndPassword) =>
+  TE.tryCatch(
+    async () => {
+      const { data, error } = await supabase.auth.api.signUpWithEmail(
+        email,
+        password
+      )
+      if (error || !data) throw error
+      else return data
+    },
+    (e) => {
+      if (e) return e as ApiError
+      else return null
+    }
+  )
 export const verifyAccessToken = (access: string) =>
   TE.tryCatch(
     async () => {
@@ -80,11 +98,11 @@ export const refreshAccessToken = (refresh: string) =>
 
 export const verifyAndRefreshUser = (auth: AuthCookie) =>
   pipe(
-    verifyAccessToken(auth.access),
-    TE.chain((user) =>
+    refreshAccessToken(auth.refresh),
+    TE.chain((auth) =>
       pipe(
-        refreshAccessToken(auth.refresh),
-        TE.map((auth) => ({
+        verifyAccessToken(auth.access),
+        TE.map((user) => ({
           user,
           auth,
         }))

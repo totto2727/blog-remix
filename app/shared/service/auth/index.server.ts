@@ -1,10 +1,11 @@
 import type { LoaderArgs, TypedResponse } from '@remix-run/node'
 import { json, redirect } from '@remix-run/node'
 import type { User } from '@supabase/supabase-js'
-import { pipe, flow } from 'fp-ts/lib/function'
+import { flow, pipe } from 'fp-ts/lib/function'
 import { E, T, TE } from '~/shared/libs/fp-ts'
 import {
   signInWithEmailAndPassword,
+  signUpWithEmailAndPassword,
   verifyAndRefreshUser,
 } from '~/shared/libs/supabase'
 import { sessionToAuthCookie } from '~/shared/models/auth-cookie'
@@ -31,7 +32,8 @@ export const requireAuth = (request: Request) =>
   )
 
 // TODO 現状Cookieの設定ができない
-// CookieSessiondでｊ管理？
+// CookieSessionで管理？
+// Cookieとオブジェクトのペアを渡す？
 export const requireAuth_ = <T>(
   loaderArgs: LoaderArgs,
   loader: (loaderArgs: LoaderArgs, user: User) => Promise<TypedResponse<T>>
@@ -75,4 +77,15 @@ export const signin = (emailAndPassword: EmailAndPassword) =>
         T.map((headers) => redirect('/admin', headers))
       )
     )
+  )
+
+export const signup = (emailAndPassword: EmailAndPassword) =>
+  pipe(
+    emailAndPassword,
+    // TODO
+    flow(
+      signUpWithEmailAndPassword,
+      TE.mapLeft(() => json('apiError'))
+    ),
+    TE.fold(T.of, () => T.of(redirect('/signin')))
   )

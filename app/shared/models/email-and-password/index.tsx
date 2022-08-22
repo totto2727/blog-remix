@@ -1,6 +1,5 @@
 import * as t from 'io-ts'
-import { NonEmptyString } from 'io-ts-types'
-import { withMessage } from 'io-ts-types'
+import { NonEmptyString, withMessage } from 'io-ts-types'
 import isEmail from 'validator/lib/isEmail'
 import { createCodecValidationReportor } from '~/shared/libs/io-ts'
 import { withIoTs } from '~/shared/libs/io-ts/remix-validated-form-helper'

@@ -15,7 +15,12 @@ const styles: Partial<Record<'body' | 'main' | 'root', CSSObject>> = {
     display: 'grid',
     gridTemplateColumns: '1fr 3fr 1fr',
   },
-  main: { padding: 0, width: '100%', height: '100%', minHeight: 'auto' },
+  main: {
+    padding: '1rm 0 0 0',
+    width: '100%',
+    height: '100%',
+    minHeight: 'auto',
+  },
 }
 
 export const AppShell: FC<{ children: ReactNode }> = (props) => {
