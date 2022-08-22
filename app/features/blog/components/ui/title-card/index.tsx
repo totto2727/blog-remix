@@ -1,4 +1,4 @@
-import { AspectRatio, Card, Title, Image, Text } from '@mantine/core'
+import { AspectRatio, Card, Image, Text, Title } from '@mantine/core'
 import { utcToZonedTime } from 'date-fns-tz'
 
 export const TitleCard = (props: {

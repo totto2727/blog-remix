@@ -1,6 +1,6 @@
+import '@relmify/jest-fp-ts'
 import { expect } from 'vitest'
 import { NonEmptyStringStrict } from './non-empty-string-strict'
-import '@relmify/jest-fp-ts'
 
 describe('NonEmptyStringStrict', () => {
   it('NonEmptyStrict', () =>

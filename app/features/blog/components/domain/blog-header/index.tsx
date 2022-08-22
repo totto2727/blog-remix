@@ -6,7 +6,7 @@ import {
   Title,
   useMantineColorScheme,
 } from '@mantine/core'
-import { TbSun, TbMoonStars } from 'react-icons/tb'
+import { TbMoonStars, TbSun } from 'react-icons/tb'
 import { notifyColorSchemeChange } from '~/shared/models/color-scheme'
 
 export const BlogHeader = () => {

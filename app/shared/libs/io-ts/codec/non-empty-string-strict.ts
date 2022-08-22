@@ -1,5 +1,5 @@
 import type { Branded, Type } from 'io-ts'
-import { brand, string } from 'io-ts'
+import { brand } from 'io-ts'
 import { NonEmptyString, withMessage } from 'io-ts-types'
 
 interface NonEmptyStringStrictBrand {

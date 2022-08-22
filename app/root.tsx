@@ -1,6 +1,5 @@
 import type { ColorScheme } from '@mantine/core'
-import { ColorSchemeProvider } from '@mantine/core'
-import { MantineProvider } from '@mantine/core'
+import { ColorSchemeProvider, MantineProvider } from '@mantine/core'
 import type {
   LinksFunction,
   LoaderFunction,

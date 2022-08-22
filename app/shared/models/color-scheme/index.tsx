@@ -1,5 +1,5 @@
 import type { TypeOf } from 'io-ts'
-import { union, literal } from 'io-ts'
+import { literal, union } from 'io-ts'
 import { createCodecValidationReportor } from '~/shared/libs/io-ts'
 
 export const colorSchemeC = union([literal('light'), literal('dark')])

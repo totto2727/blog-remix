@@ -1,10 +1,10 @@
+import { option, record } from 'fp-ts'
+import { flow, pipe } from 'fp-ts/lib/function'
+import type { Mixed, TypeOf, Validation } from 'io-ts'
 import type { Validator } from 'remix-validated-form'
 import { createValidator } from 'remix-validated-form'
-import { option, record } from 'fp-ts'
-import { pipe, flow } from 'fp-ts/lib/function'
-import type { Mixed, TypeOf, Validation } from 'io-ts'
-import { reportErrors } from './report-errors'
 import { E } from '../fp-ts'
+import { reportErrors } from './report-errors'
 
 export const getReportRecord = <A>(v: Validation<A>) =>
   pipe(

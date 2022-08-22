@@ -1,5 +1,5 @@
-import { it, describe, expect } from 'vitest'
-import * as t from 'io-ts'
+import { describe, expect, it } from 'vitest'
+import { t } from '.'
 import { getReportRecord, withIoTs } from './remix-validated-form-helper'
 
 const remixValidatedFormValidationResult = <T, U>(

@@ -12,4 +12,6 @@ module.exports = {
   bracketSameLine: false,
   // arrowParens: "avoid",
   endOfLine: 'lf',
+
+  plugins: ['prettier-plugin-organize-imports'],
 }
